@@ -3,7 +3,7 @@
 <!-- badges: start -->
 <!-- badges: end -->
 
-### 데이터 저널리즘 코리아
+### [데이터 저널리즘 코리아](https://www.facebook.com/groups/DataJournalismKR)
 
 
 
