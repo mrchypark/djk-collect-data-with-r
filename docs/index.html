@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+  <head>
+    <title>R을 이용한 데이터 크롤링</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="박찬엽" />
+    <link href="libs/remark-css-0.0.1/default.css" rel="stylesheet" />
+    <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+    <script>
+      (adsbygoogle = window.adsbygoogle || []).push({
+        google_ad_client: "ca-pub-6863685415691881",
+        enable_page_level_ads: true
+      });
+    </script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-47822682-14"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments)};
+      gtag('js', new Date());
+    
+      gtag('config', 'UA-47822682-14');
+    </script>
+    <link rel="stylesheet" href="custom.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+
+
+
+
+
+class: center, middle, title-slide
+
+## R을 이용한 데이터 크롤링 .small[with 데이터 저널리즘 코리아]
+
+### &lt;https://mrchypark.github.io/djk-collect-data-with-r&gt;
+
+#### [[의견 및 오류 신고]](https://github.com/mrchypark/djk-collect-data-with-r/issues/new)
+#### [스타누르기](https://github.com/mrchypark/djk-collect-data-with-r)는 컨텐츠 제작자를 춤추게 합니다.
+
+### 박찬엽
+
+### 2019년 4월 26일
+
+---
+
+
+class: inverse
+&lt;br&gt;
+.pull-left[
+  .pull-right[
+&lt;br&gt;
+&lt;br&gt;
+&lt;br&gt;
+    ![](https://avatars2.githubusercontent.com/u/6179259?v=4&amp;s=460)
+  ]
+]
+.pull-right[
+### 박찬엽     
+- .yellow[(현)]코빗 재무팀 데이터 담당자
+  * 재무DB 구축/관리 및 자동화
+- .gray[(전)]서울도시가스 선행연구팀 연구원
+  * 챗봇 엔진 개발 및 서버 구축
+- .gray[(전)]2017년 패스트 캠퍼스 데이터 분석 R 강의
+  * [데이터 분석을 위한 중급 R 프로그래밍](http://www.fastcampus.co.kr/data_camp_dabrp/)
+- N사 뉴스 크롤러 [N2H4](https://github.com/forkonlp/N2H4), D사 뉴스 크롤러 [DNH4](https://github.com/forkonlp/DNH4) 관리자
+  * [ForkonLP](https://forkonlp.github.io/) 프로젝트
+  
+
+- .blue[**FACEBOOK**]@[mrchypark](https://www.facebook.com/mrchypark)
+- .gray[**GITHUB**]@[mrchypark](https://github.com/mrchypark)
+]
+---
+class: inverse
+
+블로그를 운영하고 있습니다.
+
+[&lt;img src="https://user-images.githubusercontent.com/6179259/44062214-660e0516-9f96-11e8-8485-45c6b311639c.png" width=100%&gt;](https://mrchypark.github.io/)
+
+---
+class: inverse
+
+열심히 R 생태계에 기여하고 있습니다.
+
+&lt;img src="https://user-images.githubusercontent.com/6179259/44060543-fb3e0638-9f8f-11e8-8665-04a3705c2427.png" width=100%&gt;
+
+---
+class: inverse
+
+인정도 조금 받고 있습니다.
+
+[&lt;img src="https://user-images.githubusercontent.com/6179259/44060662-54345012-9f90-11e8-86e9-e5292b48770e.png" width=100%&gt;](http://git-awards.com/users?country=south+korea&amp;language=r)
+
+---
+class: inverse
+
+우연치 않게 번역도 했습니다.
+
+.pull-left[
+&lt;img src="https://user-images.githubusercontent.com/6179259/44061228-74272ac8-9f92-11e8-99fc-7c4cbd81d2b4.png" width=99%&gt;
+]
+.pull-right[
+&lt;img src="http://image.yes24.com/momo/TopCate1880/MidCate009/187987333.jpg" width=85%&gt;
+]
+---
+class: inverse
+
+한글 텍스트 기반 데이터 보급에 노력하고 있습니다.
+
+[&lt;img src="https://user-images.githubusercontent.com/6179259/44061522-af39c80e-9f93-11e8-8977-9da05ee24115.png" width=100%&gt;](https://forkonlp.github.io/)
+
+---
+class: inverse
+
+### [.blue[forkonlp]](https://forkonlp.github.io/)     
+  - [N2H4](https://github.com/forkonlp/N2H4) : 댓글 수집이 가능한 네이버 뉴스 크롤러
+  - [DNH4](https://github.com/forkonlp/DNH4) : 댓글 수집이 가능한 다음 뉴스 크롤러 
+  - [presidentSpeechKr](https://github.com/forkonlp/presidentSpeechKr) : 대통령 연설문
+  - [stdkor](https://github.com/forkonlp/stdkor) : 표준국어대사전 텍스트 자료
+
+### [.yellow[개인]](https://mrchypark.github.io/about)  
+  - [sendgridr](https://github.com/mrchypark/sendgridr) : 메일 전송 서비스 sendgrid api 패키지
+  - [ubci](https://github.com/mrchypark/ubci) : 업비트 거래소 인덱스&amp;시세 데이터 
+  - [tqk](https://github.com/mrchypark/tqk) : 한국 주식 데이터
+  - [krlift](https://github.com/mrchypark/krlift) : 한국 승강기 현황 데이터
+  - [krlandprice](https://github.com/mrchypark/krlandprice) : 한국 표준공시지가 데이터
+---
+class: center, middle, title-slide, inverse
+
+# .pen-p[잘 부탁드립니다.]
+
+
+---
+
+class: center, middle, title-slide
+
+## .pen-p[R로 웹 데이터를 가져오는 4가지 방법]
+
+---
+class: center, middle, title-slide
+
+## 웹에 있는 데이터를 가져오는 단계
+
+### 요청 - 추출 - 저장 
+### 반복 - 예외처리 - 최적화
+
+---
+
+## 관련 R 패키지 및 함수
+
+#### - 요청 : curl, httr, rvest, RSelenium
+#### - 정리 : 정규표현식, jsonlite, rvest
+#### - 저장 : write.*()
+#### - 반복 : for, parallel
+#### - 예외처리 : try, if
+#### - 최적화 : profvis, microbenchmark
+
+---
+
+## 관련 R 패키지 및 함수
+
+#### **- 요청 : curl, httr, rvest, RSelenium**
+#### **- 정리 : 정규표현식, jsonlite, rvest**
+#### - .gray[저장 : write.*()]
+#### - .gray[반복 : for, parallel]
+#### - .gray[예외처리 : try, if]
+#### - .gray[최적화 : profvis, microbenchmark]
+
+---
+
+class: center, middle, title-slide
+
+## 오늘 이야기 할 것
+
+### 요청(4가지)과 정리
+### .gray[메인과 에피타이저]
+
+---
+
+class: center, middle, title-slide
+
+## 그럼 에피타이저 먼저!
+
+---
+
+## 서버가 하는 것
+.pull-left[
+외부에서 요청하면 규칙대로 정보를 제공하는 것
+]
+.pull-right[
+![](https://pbs.twimg.com/profile_images/581161893219323904/eGnWc30X.png)
+]
+---
+
+## 브라우저가 하는 것
+
+.pull-left[
+서버가 주는 것들을 사용자에게 보여주는 것
+]
+.pull-right[
+![](https://cdn.dribbble.com/users/107490/screenshots/2384364/icon-cloud-06_1x.png)
+]
+---
+
+## 웹 서버가 우리에게 주는 것
+
+text(html, css, js, etc), image. 브라우저가 약속된 모양으로 우리에게 보여줌.
+
+.pull-center[.set[
+![](https://qph.ec.quoracdn.net/main-qimg-1f99b9ce08edd2309efff97b710ffcbe)
+]]
+
+---
+
+## 실제로 브라우저가 받는 파일들
+
+.pull-center[.half[
+![](https://raw.githubusercontent.com/mrchypark/getWebR/master/img/source.png)
+]]
+
+---
+
+class: center, middle, title-slide
+
+## * 그럼 web api는 뭔가?
+
+web으로 제공되는 Application Programming Interface
+
+함수인데 외부 서버에서 동작하여 웹 기술로 결과를 받는 것
+
+---
+
+## 우리가 필요한 것
+
+text(html) 중 일부만(ex&gt;제목)
+
+![](https://raw.githubusercontent.com/mrchypark/getWebR/master/img/title.png)
+
+---
+
+class: center, middle, title-slide
+
+
+### 그럼 이제 정리(에피타이저)를 설명
+
+#### .blue[html 문서안에 글자 중 필요한 것만 가져오기]
+
+---
+
+class: center, middle, title-slide
+
+#### 1번 글자를 다루는 강력한 방법 : 정규표현식 하지만 어려움    
+
+### 2번 xml의 node를 다루는 패키지 : rvest
+
+---
+
+class: center, middle, title-slide
+
+정규표현식은 [검색](https://www.google.co.kr/search?q=%EC%A0%95%EA%B7%9C%ED%91%9C%ED%98%84%EC%8B%9D&amp;oq=%EC%A0%95%EA%B7%9C%ED%91%9C%ED%98%84%EC%8B%9D&amp;aqs=chrome..69i57j69i61.2391j0j7&amp;sourceid=chrome&amp;ie=UTF-8)해보세요.
+r에서는 [stringr](https://github.com/tidyverse/stringr) 이라는 서포트 패키지가 있음.
+
+---
+
+class: center, middle, title-slide
+
+## [rvest](https://github.com/hadley/rvest)
+
+### node, attr, text만 기억하면 됨.
+
+---
+
+## node란
+
+html에서 tag라고 불리는 것.
+.pull-center[.ori[
+![](https://lh3.googleusercontent.com/SSAbYW6kAM728XuKv3PK5Uhgva0ueIBDnoGhPkou6lp9QYgDVwRFivfQNgORT8FT5js4gBFezjSvZlqujcbWup6yXvRTkEOkMotawSPcaOpc9dQvyVP05ODEFw)
+]]
+---
+
+## 그럼 html 이란
+
+[xml](https://ko.wikipedia.org/wiki/XML)양식으로 작성된 웹 브라우저들이 이해하는 표준 문서
+
+.pull-center[.ori[
+![](https://lh3.googleusercontent.com/az75sycVUFHD0aIKUmCZrs_Nf3-LCxiHSsYUZ_z5umiHK3XX77f1A6vCCD7YZYQNOAploEFjMYcu9x-DxRe5JdqZGFsnA3FhCvO3pRNBsK5M50RgzKd0hrx2gg)
+]]
+
+---
+
+## attr 이란
+
+attr은 attribute의 줄임으로 아래 예시로 tag의 attr1은 example1 임
+
+```{}
+&lt;tag attr1="example1" attr2="example2"&gt; 안녕하세요 &lt;/tag&gt;
+```
+
+---
+
+#### 원하는 글자가 있는 노드를 지정하기 위해서
+
+[css 선택자](http://www.nextree.co.kr/p8468/)를 공부해야 함.
+
+--
+
+#### css 선택자가 동작하는 방식
+
+1. tag 이름
+2. tag의 id 속성
+3. tag의 class 속성
+4. tag의 custom 속성
+
+--
+
+#### css 선택자로 node를 선택하기 위해서
+
+1. `tag`
+1. `#id`
+1. `.class`
+1. `[attr="val"]`
+1. `tag#id`
+1. `tag.class`
+1. `tag[attr="val"]`
+
+---
+
+## text 이란
+
+text은 시작 태그와 종료 태그 사이에 있는 글자로, 아래 예시 기준 "안녕하세요" 를 뜻함
+
+```{}
+&lt;tag attr1="example1" attr2="example2"&gt; 안녕하세요 &lt;/tag&gt;
+```
+
+---
+
+## rvest의 동작 순서(text 가져오기)
+
+1. html 문서 데이터 가져오기
+1. 필요한 노드 선택하기
+1. 노드내에 text를 가져오기
+
+
+### rvest 함수
+
+```{}
+read_html(url)
+read_html(url) %&gt;% html_nodes("tag.class")
+read_html(url) %&gt;% html_nodes("tag.class") %&gt;% html_text
+```
+
+---
+
+## rvest의 동작 순서(attr 가져오기)
+
+1. html 문서 데이터 가져오기
+1. 필요한 노드 선택하기
+1. 노드내에 attr 중에 "attr1"값을 가져오기
+
+
+### rvest 함수
+
+```{}
+read_html(url)
+read_html(url) %&gt;% html_nodes("tag.class")
+read_html(url) %&gt;% html_nodes("tag.class") %&gt;% html_attr("attr1")
+```
+
+---
+
+## 예시
+
+
+```r
+library(rvest)
+```
+
+```
+## Loading required package: xml2
+```
+
+```r
+url&lt;-"https://news.naver.com/main/hotissue/read.nhn?mid=hot&amp;sid1=100&amp;cid=1079165&amp;iid=2975770&amp;oid=001&amp;aid=0010571037&amp;ptype=052"
+(nv&lt;-read_html(url))
+```
+
+```
+## {xml_document}
+## &lt;html lang="ko"&gt;
+## [1] &lt;head&gt;\n&lt;meta http-equiv="Content-Type" content="text/html; charset= ...
+## [2] &lt;body&gt;\r\n&lt;div id="wrap"&gt;\r\n\t\r\n\t&lt;div id="da_base"&gt;&lt;/div&gt;\r\n\t&lt; ...
+```
+
+```r
+(nvns&lt;-html_nodes(nv, "h3#articleTitle"))
+```
+
+```
+## {xml_nodeset (1)}
+## [1] &lt;h3 id="articleTitle"&gt;'깜짝 방중' 김정은, 中과 조율 마치고 美와 대화 본격 나서나&lt;/h3&gt;
+```
+.pull-left[
+
+```r
+(title&lt;-html_text(nvns))
+```
+
+```
+## [1] "'깜짝 방중' 김정은, 中과 조율 마치고 美와 대화 본격 나서나"
+```
+]
+.pull-right[
+
+```r
+(class&lt;-html_attr(nvns, "class"))
+```
+
+```
+## [1] NA
+```
+]
+---
+
+class: center, middle, title-slide
+
+rvest는 html 문서로 되어 있는 웹에서의 텍스트 데이터를 가져와서 처리하는 패키지
+
+---
+
+class: center, middle, title-slide
+
+## 이제 메인! 요청하기
+### (read_html이 방법 1 ㄷㄷㄷ)
+
+---
+
+class: center, middle, title-slide
+
+### 그래서 우리가 알아야 할 것
+
+## GET과 POST
+
+---
+
+class: center, middle, title-slide
+
+방금 read_html 함수는 GET 방식으로 서버에 요청하여 html 문서를 받은 것.
+
+---
+
+class: center, middle, title-slide
+
+http 표준 요청을 수행해 주는 [httr](https://github.com/r-lib/httr) 패키지
+
+---
+
+## GET 요청
+
+read_html(url) == content(GET(url)) 인걸로 GET 요청으로 html 문서를 가져올 때는 read_html()함수가 함께 처리해줌.
+
+
+```r
+library(httr)
+library(rvest)
+
+url&lt;-"http://news.naver.com/main/read.nhn?mode=LSD&amp;mid=shm&amp;sid1=102&amp;oid=437&amp;aid=0000165410"
+dat&lt;-GET(url)
+content(dat)
+```
+
+```
+## {xml_document}
+## &lt;html lang="ko"&gt;
+## [1] &lt;head&gt;\n&lt;meta http-equiv="Content-Type" content="text/html; charset= ...
+## [2] &lt;body&gt;\r\n&lt;div id="wrap"&gt;\r\n\t\r\n\t&lt;div id="da_base"&gt;&lt;/div&gt;\r\n\t&lt; ...
+```
+
+```r
+read_html(url)
+```
+
+```
+## {xml_document}
+## &lt;html lang="ko"&gt;
+## [1] &lt;head&gt;\n&lt;meta http-equiv="Content-Type" content="text/html; charset= ...
+## [2] &lt;body&gt;\r\n&lt;div id="wrap"&gt;\r\n\t\r\n\t&lt;div id="da_base"&gt;&lt;/div&gt;\r\n\t&lt; ...
+```
+
+---
+
+class: center, middle, title-slide
+
+## 왜 GET 함수를 써야 하는가
+
+header, cookie 등 다양한 옵션을 사용할 수 있음.    
+
+ex&gt; 크롤러가 아니라고 속여야 한다던가....
+
+---
+
+class: center, middle, title-slide
+
+### 그럼 POST 란?
+
+---
+
+## POST 란
+
+body에 사용자가 필요한 값을 추가해서 요청을 할 수 있는 방법
+
+---
+
+## 사용할 api
+
+[한글 띄어쓰기 api](http://freesearch.pe.kr/archives/4647)
+
+띄어쓰기가 불문명한 텍스트를 전달하면 맞는 띄어쓰기 결과를 돌려줌.
+
+---
+
+## 실행
+
+```r
+library(httr)
+
+body&lt;-list(sent="아래와같은방식으로API를사용할수있으며,호출건수에대해서별도의제한은없으나,1회 호출에200글자로글자수를제한하고있다.")
+res&lt;-PUT(url='http://35.201.156.140:8080/spacing', body=body)
+
+content(res)$sent
+```
+```
+## [1] "아래와 같은 방식으로 API를 사용할 수 있으며, 호출 건수에 대해서 별도의 제한은 없으나, 1회 호출에 200글자로 글자수를 제한하고 있다. "
+```
+---
+
+## body 란
+
+list() 자료형으로 되어 있고 이름이 있는 데이터로 만든 요청에 추가할 수 있는 값
+
+```r
+body &lt;- list(sent = "아래와같은방식으로API를사용할수있으며,호출건수에대해서별도의제한은없으나,1회 호출에200글자로글자수를제한하고있다.")
+body
+```
+```
+## $sent
+## [1] "아래와같은방식으로API를사용할수있으며,호출건수에대해서별도의제한은없으나,1회 호출에200글자로글자수를제한하고있다."
+```
+
+---
+
+## 여긴 PUT 이라고 되어 있는데?
+
+PUT은 POST와 매우 유사한 요청 방식으로 서버에서 요구하는 방식을 지켜줘야함. 예시로 PUT을 사용했지만, 다른 POST가 필요한 곳에서는 POST 명령으로 작성하면 됨. 서비스 제공자가 설명서를 작성하게 되어있음.
+
+```r
+(res &lt;- PUT(url = 'http://35.201.156.140:8080/spacing', body=body))
+```
+
+```
+## Response [http://35.201.156.140:8080/spacing]
+##   Date: 2017-10-18 06:48
+##   Status: 200
+##   Content-Type: application/json
+##   Size: 348 B
+## {"sent": "\uc544\ub798\uc640 \uac19\uc740 \ubc29\uc2dd\uc73c\ub85c API\u...
+```
+
+---
+
+## api 명세 예시
+
+![](https://raw.githubusercontent.com/mrchypark/getWebR/master/img/api.png)
+
+---
+
+## content() 함수
+
+httr 패키지의 요청들은 read_html() 함수와 달리 header 나 cookie 등의 모든 정보를 다 확인할 수 있음. 그래서 응답으로 서버가 데이터로써 준 내용을 확인하기 위해서 content() 함수를 제공함.
+
+```r
+content(res)
+```
+```
+## $sent
+## [1] "아래와 같은 방식으로 API를 사용할 수 있으며, 호출 건수에 대해서 별도의 제한은 없으나, 1회 호출에 200글자로 글자수를 제한하고 있다. "
+```
+
+
+---
+
+class: center, middle, title-slide
+
+여기까지가 http 요청을 따라하는 httr 패키지(방법 2)
+
+---
+class: center, middle, title-slide
+
+## 중간 정산
+
+이제 정적 웹 서비스내의 글자와 web api 데이터를 가져오는 2가지 방법을 알게 됨.
+
+---
+class: center, middle, title-slide
+
+## 이제 필요한 것
+
+### 동적 웹 서비스에서 가져오기
+
+---
+
+## 동적 웹 서비스란
+
+javascript&lt;sup&gt;1&lt;/sup&gt;가 웹페이지 동작을 조절하는 것.
+
+.pull-center[.set[
+![](https://qph.ec.quoracdn.net/main-qimg-1f99b9ce08edd2309efff97b710ffcbe)
+]]
+
+.footnote[
+[1] [javascript](https://ko.wikipedia.org/wiki/%EC%9E%90%EB%B0%94%EC%8A%A4%ED%81%AC%EB%A6%BD%ED%8A%B8) : 브라우저에서 동작하는 개발 언어로 동적 웹 서비스를 개발하는 목적으로 많이 사용함.
+]
+
+---
+
+## 그래서 브라우저가 필요함
+
+동적 웹 서비스내의 데이터는 브라우저가 처리해준 결과이기 때문에 브라우저와 같이 처리하는 방법을 찾던지, 브라우저를 사용하던지 해야 함.
+
+---
+class: center, middle, title-slide
+
+
+## [RSelenium](https://github.com/ropensci/RSelenium)
+
+---
+
+## Selenium 이란
+
+Selenium은 코드로 브라우저를 컨트롤하는 패키지. 그래서 브라우저를 움직일 수 있다! 그걸 R에서 사용하는 [RSelenium 패키지](https://github.com/ropensci/RSelenium)를 사용할 예정
+
+.pull-center[.ori[
+![](https://2.bp.blogspot.com/-idwhrEvGRcM/WAhO0w9TwnI/AAAAAAAAAGU/xThZWzPBrfIiz_RbcIk4CTwrpZiVJayFgCLcB/s320/Selenium.jpg)
+]]
+
+---
+
+class: center, middle, title-slide
+
+## 어떤 브라우저를 사용할까?
+
+## [phantomjs](http://phantomjs.org/)
+
+---
+
+## phantonjs 란
+
+phantomjs는 headless 브라우저로 headless란 사람이 보는 부분이 없는 것
+
+.pull-center[.ori[
+![](http://phantomjs.org/img/phantomjs-logo.png)
+]]
+
+.footnote[
+ * 최근 chrome도 headless를 자체적으로 지원하기 시작함.
+]
+
+---
+
+## 실행
+
+```r
+library(RSelenium)
+pJS &lt;- wdman::phantomjs(port = 4567L)
+```
+```
+## checking phantomjs versions:
+## BEGIN: PREDOWNLOAD
+## BEGIN: DOWNLOAD
+## BEGIN: POSTDOWNLOAD
+```
+```r
+remDr &lt;- remoteDriver(port = 4567L, browserName = 'phantomjs')
+remDr$open()
+```
+```
+## [1] "Connecting to remote server"
+## $browserName
+## [1] "phantomjs"
+## 
+## $version
+## [1] "2.1.1"
+## 
+## $driverName
+## [1] "ghostdriv
+```
+
+---
+
+## 실행
+
+```r
+remDr$navigate("http://www.google.com/ncr")
+remDr$getTitle()[[1]]
+```
+```
+## [1] "Google"
+```
+```r
+remDr$close()
+pJS$stop()
+```
+```
+## [1] TRUE
+```
+
+---
+
+## 시연
+
+키 입력과 마우스 클릭을 확인
+
+[시연코드 가기](https://raw.githubusercontent.com/mrchypark/getWebR/master/RSelenium.R)
+
+---
+
+class: center, middle, title-slide
+
+RSelenium이란 브라우저를 컨트롤하는 패키지(방법 3)
+
+---
+
+class: center, middle, title-slide
+
+마지막으로...
+
+---
+
+## +고급
+
+크롬 개발자 도구를 이용하면 js가 가져오는 api를 찾아서 더 빠르게 정보를 가져올 수 있음
+
+![](https://raw.githubusercontent.com/mrchypark/getWebR/master/img/comment.png)
+
+---
+
+## GET 요청
+
+찾아낸 주소에 GET() 요청을 시도함(은 실패). 이런 웹 서비스 내에서 사용하는 api의 경우 OpenAPI 가 아니기 때문에 설명서 없고, 다양한 시도를 통해서 사용법을 찾아야 함.
+
+
+```r
+url&lt;-"https://apis.naver.com/commentBox/cbox/web_naver_list_jsonp.json?ticket=news&amp;templateId=view_society&amp;pool=cbox5&amp;_callback=jQuery1707377572341505474_1508264183038&amp;lang=ko&amp;country=&amp;objectId=news437%2C0000165410&amp;categoryId=&amp;pageSize=10&amp;indexSize=10&amp;groupId=&amp;listType=OBJECT&amp;page=1&amp;sort=new&amp;includeAllStatus=true&amp;_=1508264264524"
+
+con &lt;- httr::GET(url)
+tt &lt;- httr::content(con, "text")
+tt
+```
+
+```
+## [1] "jQuery1707377572341505474_1508264183038({\"success\":false,\"code\":\"3999\",\"message\":\"잘못된 접근입니다.\",\"lang\":\"ko\",\"country\":\"UNKNOWN\",\"result\":{},\"date\":\"2019-04-25T22:26:37+0000\"});"
+```
+
+---
+
+## 추가 정보 제공
+
+네이버 뉴스 댓글의 경우, referer라는 정보가 요청 header에 있어야만 정상 동작함
+
+
+```r
+url&lt;-"https://apis.naver.com/commentBox/cbox/web_naver_list_jsonp.json?ticket=news&amp;templateId=view_society&amp;pool=cbox5&amp;_callback=jQuery1707377572341505474_1508264183038&amp;lang=ko&amp;country=&amp;objectId=news437%2C0000165410&amp;categoryId=&amp;pageSize=10&amp;indexSize=10&amp;groupId=&amp;listType=OBJECT&amp;page=1&amp;sort=new&amp;includeAllStatus=true&amp;_=1508264264524"
+ref&lt;-"http://news.naver.com/main/read.nhn?mode=LSD&amp;mid=shm&amp;sid1=102&amp;oid=437&amp;aid=0000165410"
+con &lt;- httr::GET(url,
+                 httr::add_headers(Referer = ref))
+tt &lt;- httr::content(con, "text")
+tt
+```
+
+```
+## [1] "jQuery1707377572341505474_1508264183038({\"success\":true,\"code\":\"1000\",\"message\":\"요청을 성공적으로 처리하였습니다.\",\"lang\":\"ko\",\"country\":\"UNKNOWN\",\"result\":{\"commentList\":[{\"ticket\":\"news\",\"objectId\":\"news437,0000165410\",\"categoryId\":\"*\",\"templateId\":\"view_society\",\"commentNo\":1099281045,\"parentCommentNo\":1099281045,\"replyLevel\":1,\"replyCount\":0,\"replyAllCount\":0,\"replyPreviewNo\":null,\"replyList\":null,\"imageCount\":0,\"imageList\":null,\"imagePathList\":null,\"imageWidthList\":null,\"imageHeightList\":null,\"commentType\":\"txt\",\"stickerId\":null,\"sticker\":null,\"sortValue\":1508285910732,\"contents\":\"드라마세트장같은건 시간이 지나면 서서히 시들게 되있음 그럼 거기다 돈을 투자할려면 장기적으로 보고 후에 다른 컨텐츠를 확보해서 유지할 생각을 해야되는데 아무도 그런생각을 안함. 그런 상황도 모르고 지차체에서 돈퍼줄 생각을 한 사람도 잘라야됨\",\"userIdNo\":\"\",\"exposedUserIp\":null,\"lang\":\"ko\",\"country\":\"KR\",\"idType\":\"naver\",\"idProvider\":\"naver\",\"userName\":\"k1_h****\",\"userProfileImage\":\"http://profile.phinf.naver.net/44766/f50ff2238a6237ad6f173d7639bac8e328ef6e9aa31ca3fe1b68e94299682698.jpg\",\"profileType\":\"naver\",\"modTime\":\"2017-10-18T09:18:30+0900\",\"modTimeGmt\":\"2017-10-18T00:18:30+0000\",\"regTime\":\"2017-10-18T09:18:30+0900\",\"regTimeGmt\":\"2017-10-18T00:18:30+0000\",\"sympathyCount\":1,\"antipathyCount\":1,\"userBlind\":false,\"hideReplyButton\":false,\"status\":0,\"mine\":false,\"best\":false,\"mentions\":null,\"toUser\":null,\"userStatus\":0,\"categoryImage\":null,\"open\":false,\"levelCode\":null,\"grades\":null,\"sympathy\":false,\"antipathy\":false,\"snsList\":null,\"metaInfo\":null,\"extension\":null,\"audioInfoList\":null,\"translation\":null,\"report\":null,\"middleBlindReport\":false,\"spamInfo\":null,\"userHomepageUrl\":null,\"defamation\":false,\"hiddenByCleanbot\":false,\"visible\":true,\"serviceId\":null,\"manager\":false,\"deleted\":false,\"anonymous\":false,\"blindReport\":false,\"virtual\":false,\"secret\":false,\"blind\":false,\"expose\":true,\"profileUserId\":null,\"containText\":true,\"exposeByCountry\":false,\"maskedUserId\":\"k1_h****\",\"maskedUserName\":\"k1****\",\"validateBanWords\":false},{\"ticket\":\"news\",\"objectId\":\"news437,0000165410\",\"categoryId\":\"*\",\"templateId\":\"view_society\",\"commentNo\":1099270075,\"parentCommentNo\":1099270075,\"replyLevel\":1,\"replyCount\":0,\"replyAllCount\":0,\"replyPreviewNo\":null,\"replyList\":null,\"imageCount\":0,\"imageList\":null,\"imagePathList\":null,\"imageWidthList\":null,\"imageHeightList\":null,\"commentType\":\"txt\",\"stickerId\":\"\",\"sticker\":null,\"sortValue\":1508284825689,\"contents\":\"\",\"userIdNo\":\"\",\"exposedUserIp\":null,\"lang\":\"ko\",\"country\":\"KR\",\"idType\":\"naver\",\"idProvider\":\"naver\",\"userName\":\"ultr****\",\"userProfileImage\":\"\",\"profileType\":\"naver\",\"modTime\":\"2017-10-22T17:31:25+0900\",\"modTimeGmt\":\"2017-10-22T08:31:25+0000\",\"regTime\":\"2017-10-18T09:00:25+0900\",\"regTimeGmt\":\"2017-10-18T00:00:25+0000\",\"sympathyCount\":0,\"antipathyCount\":0,\"userBlind\":false,\"hideReplyButton\":false,\"status\":1,\"mine\":false,\"best\":false,\"mentions\":null,\"toUser\":null,\"userStatus\":null,\"categoryImage\":null,\"open\":false,\"levelCode\":null,\"grades\":null,\"sympathy\":false,\"antipathy\":false,\"snsList\":null,\"metaInfo\":null,\"extension\":null,\"audioInfoList\":null,\"translation\":null,\"report\":null,\"middleBlindReport\":false,\"spamInfo\":null,\"userHomepageUrl\":null,\"defamation\":false,\"hiddenByCleanbot\":false,\"visible\":false,\"serviceId\":null,\"manager\":false,\"deleted\":true,\"anonymous\":false,\"blindReport\":false,\"virtual\":false,\"secret\":false,\"blind\":false,\"expose\":false,\"profileUserId\":null,\"containText\":true,\"exposeByCountry\":false,\"maskedUserId\":\"ultr****\",\"maskedUserName\":\"ul****\",\"validateBanWords\":false},{\"ticket\":\"news\",\"objectId\":\"news437,0000165410\",\"categoryId\":\"*\",\"templateId\":\"default_society\",\"commentNo\":1099269365,\"parentCommentNo\":1099269365,\"replyLevel\":1,\"replyCount\":0,\"replyAllCount\":0,\"replyPreviewNo\":null,\"replyList\":null,\"imageCount\":0,\"imageList\":null,\"imagePathList\":null,\"imageWidthList\":null,\"imageHeightList\":null,\"commentType\":\"txt\",\"stickerId\":null,\"sticker\":null,\"sortValue\":1508284760064,\"contents\":\"관리와 꾸준한 홍보 했음 이리  허물겠어?  주민들도 그래 지들이 관광객 받을 생각이였음 누워서 떡먹을 생각말고 지들끼리라도 발전시켰어야지\",\"userIdNo\":\"\",\"exposedUserIp\":null,\"lang\":\"ko\",\"country\":\"KR\",\"idType\":\"naver\",\"idProvider\":\"naver\",\"userName\":\"tkfk****\",\"userProfileImage\":\"http://profile.phinf.naver.net/30648/bb8ebf7639fac3779b7a38a0da1ccc91fdfaaf29f8a84861cb9985438924e8f5.jpg\",\"profileType\":\"naver\",\"modTime\":\"2017-10-18T08:59:20+0900\",\"modTimeGmt\":\"2017-10-17T23:59:20+0000\",\"regTime\":\"2017-10-18T08:59:20+0900\",\"regTimeGmt\":\"2017-10-17T23:59:20+0000\",\"sympathyCount\":0,\"antipathyCount\":0,\"userBlind\":false,\"hideReplyButton\":false,\"status\":0,\"mine\":false,\"best\":false,\"mentions\":null,\"toUser\":null,\"userStatus\":0,\"categoryImage\":null,\"open\":false,\"levelCode\":null,\"grades\":null,\"sympathy\":false,\"antipathy\":false,\"snsList\":null,\"metaInfo\":null,\"extension\":null,\"audioInfoList\":null,\"translation\":null,\"report\":null,\"middleBlindReport\":false,\"spamInfo\":null,\"userHomepageUrl\":null,\"defamation\":false,\"hiddenByCleanbot\":false,\"visible\":true,\"serviceId\":null,\"manager\":false,\"deleted\":false,\"anonymous\":false,\"blindReport\":false,\"virtual\":false,\"secret\":false,\"blind\":false,\"expose\":true,\"profileUserId\":null,\"containText\":true,\"exposeByCountry\":false,\"maskedUserId\":\"tkfk****\",\"maskedUserName\":\"tk****\",\"validateBanWords\":false},{\"ticket\":\"news\",\"objectId\":\"news437,0000165410\",\"categoryId\":\"*\",\"templateId\":\"view_society\",\"commentNo\":1099268805,\"parentCommentNo\":1099268805,\"replyLevel\":1,\"replyCount\":0,\"replyAllCount\":0,\"replyPreviewNo\":null,\"replyList\":null,\"imageCount\":0,\"imageList\":null,\"imagePathList\":null,\"imageWidthList\":null,\"imageHeightList\":null,\"commentType\":\"txt\",\"stickerId\":\"\",\"sticker\":null,\"sortValue\":1508284712984,\"contents\":\"\",\"userIdNo\":\"\",\"exposedUserIp\":null,\"lang\":\"ko\",\"country\":\"KR\",\"idType\":\"naver\",\"idProvider\":\"naver\",\"userName\":\"thet****\",\"userProfileImage\":\"\",\"profileType\":\"naver\",\"modTime\":\"2017-10-18T19:10:28+0900\",\"modTimeGmt\":\"2017-10-18T10:10:28+0000\",\"regTime\":\"2017-10-18T08:58:32+0900\",\"regTimeGmt\":\"2017-10-17T23:58:32+0000\",\"sympathyCount\":0,\"antipathyCount\":0,\"userBlind\":false,\"hideReplyButton\":false,\"status\":1,\"mine\":false,\"best\":false,\"mentions\":null,\"toUser\":null,\"userStatus\":null,\"categoryImage\":null,\"open\":false,\"levelCode\":null,\"grades\":null,\"sympathy\":false,\"antipathy\":false,\"snsList\":null,\"metaInfo\":null,\"extension\":null,\"audioInfoList\":null,\"translation\":null,\"report\":null,\"middleBlindReport\":false,\"spamInfo\":null,\"userHomepageUrl\":null,\"defamation\":false,\"hiddenByCleanbot\":false,\"visible\":false,\"serviceId\":null,\"manager\":false,\"deleted\":true,\"anonymous\":false,\"blindReport\":false,\"virtual\":false,\"secret\":false,\"blind\":false,\"expose\":false,\"profileUserId\":null,\"containText\":true,\"exposeByCountry\":false,\"maskedUserId\":\"thet****\",\"maskedUserName\":\"th****\",\"validateBanWords\":false},{\"ticket\":\"news\",\"objectId\":\"news437,0000165410\",\"categoryId\":\"*\",\"templateId\":\"view_society\",\"commentNo\":1099257875,\"parentCommentNo\":1099257875,\"replyLevel\":1,\"replyCount\":0,\"replyAllCount\":0,\"replyPreviewNo\":null,\"replyList\":null,\"imageCount\":0,\"imageList\":null,\"imagePathList\":null,\"imageWidthList\":null,\"imageHeightList\":null,\"commentType\":\"txt\",\"stickerId\":null,\"sticker\":null,\"sortValue\":1508283563049,\"contents\":\"임기내에 뭔가 보이는 업적 쌓아보겠다고 이것저것 많이 쳐 만드는데 막상 시간지나면 쓸데없어진게 대다수고 그런데서 세금 줄줄 다 새지. 시공업체 뇌물 받아먹기도 안성맞춤\",\"userIdNo\":\"\",\"exposedUserIp\":null,\"lang\":\"ko\",\"country\":\"KR\",\"idType\":\"naver\",\"idProvider\":\"naver\",\"userName\":\"tu17****\",\"userProfileImage\":\"http://profile.phinf.naver.net/35620/efa8622468f699acd76a664da4dbace7f8e94db32a4f4c09af0b4756e32fabde.jpg\",\"profileType\":\"naver\",\"modTime\":\"2017-10-18T08:39:23+0900\",\"modTimeGmt\":\"2017-10-17T23:39:23+0000\",\"regTime\":\"2017-10-18T08:39:23+0900\",\"regTimeGmt\":\"2017-10-17T23:39:23+0000\",\"sympathyCount\":1,\"antipathyCount\":0,\"userBlind\":false,\"hideReplyButton\":false,\"status\":0,\"mine\":false,\"best\":false,\"mentions\":null,\"toUser\":null,\"userStatus\":0,\"categoryImage\":null,\"open\":false,\"levelCode\":null,\"grades\":null,\"sympathy\":false,\"antipathy\":false,\"snsList\":null,\"metaInfo\":null,\"extension\":null,\"audioInfoList\":null,\"translation\":null,\"report\":null,\"middleBlindReport\":false,\"spamInfo\":null,\"userHomepageUrl\":null,\"defamation\":false,\"hiddenByCleanbot\":false,\"visible\":true,\"serviceId\":null,\"manager\":false,\"deleted\":false,\"anonymous\":false,\"blindReport\":false,\"virtual\":false,\"secret\":false,\"blind\":false,\"expose\":true,\"profileUserId\":null,\"containText\":true,\"exposeByCountry\":false,\"maskedUserId\":\"tu17****\",\"maskedUserName\":\"tu****\",\"validateBanWords\":false},{\"ticket\":\"news\",\"objectId\":\"news437,0000165410\",\"categoryId\":\"*\",\"templateId\":\"view_society\",\"commentNo\":1099246205,\"parentCommentNo\":1099246205,\"replyLevel\":1,\"replyCount\":0,\"replyAllCount\":0,\"replyPreviewNo\":null,\"replyList\":null,\"imageCount\":0,\"imageList\":null,\"imagePathList\":null,\"imageWidthList\":null,\"imageHeightList\":null,\"commentType\":\"txt\",\"stickerId\":null,\"sticker\":null,\"sortValue\":1508282463113,\"contents\":\"그래서 다스는 누구껀가요?\",\"userIdNo\":\"\",\"exposedUserIp\":null,\"lang\":\"ko\",\"country\":\"KR\",\"idType\":\"naver\",\"idProvider\":\"naver\",\"userName\":\"proh****\",\"userProfileImage\":\"http://profile.phinf.naver.net/35904/c11e83263ffce280074f49992adc2643fe84e3f8242474171890b862d54f231b.jpg\",\"profileType\":\"naver\",\"modTime\":\"2017-10-18T08:21:03+0900\",\"modTimeGmt\":\"2017-10-17T23:21:03+0000\",\"regTime\":\"2017-10-18T08:21:03+0900\",\"regTimeGmt\":\"2017-10-17T23:21:03+0000\",\"sympathyCount\":1,\"antipathyCount\":1,\"userBlind\":false,\"hideReplyButton\":false,\"status\":0,\"mine\":false,\"best\":false,\"mentions\":null,\"toUser\":null,\"userStatus\":0,\"categoryImage\":null,\"open\":true,\"levelCode\":null,\"grades\":null,\"sympathy\":false,\"antipathy\":false,\"snsList\":null,\"metaInfo\":null,\"extension\":null,\"audioInfoList\":null,\"translation\":null,\"report\":null,\"middleBlindReport\":false,\"spamInfo\":null,\"userHomepageUrl\":null,\"defamation\":false,\"hiddenByCleanbot\":false,\"visible\":true,\"serviceId\":null,\"manager\":false,\"deleted\":false,\"anonymous\":false,\"blindReport\":false,\"virtual\":false,\"secret\":false,\"blind\":false,\"expose\":true,\"profileUserId\":null,\"containText\":true,\"exposeByCountry\":false,\"maskedUserId\":\"proh****\",\"maskedUserName\":\"pr****\",\"validateBanWords\":false},{\"ticket\":\"news\",\"objectId\":\"news437,0000165410\",\"categoryId\":\"*\",\"templateId\":\"view_society\",\"commentNo\":1099243595,\"parentCommentNo\":1099243595,\"replyLevel\":1,\"replyCount\":0,\"replyAllCount\":0,\"replyPreviewNo\":null,\"replyList\":null,\"imageCount\":0,\"imageList\":null,\"imagePathList\":null,\"imageWidthList\":null,\"imageHeightList\":null,\"commentType\":\"txt\",\"stickerId\":null,\"sticker\":null,\"sortValue\":1508282164602,\"contents\":\"영화찍을때 화재 연기좀 안나게 합시다 매연과 미세먼지 보기만 해도 숨막혀여~\",\"userIdNo\":\"\",\"exposedUserIp\":null,\"lang\":\"ko\",\"country\":\"KR\",\"idType\":\"naver\",\"idProvider\":\"naver\",\"userName\":\"cms2****\",\"userProfileImage\":\"http://profile.phinf.naver.net/38679/02fe0249291160ba4f57f3ab6f62df73c6e1144cf2b2efb005f967715142d33a.jpg\",\"profileType\":\"naver\",\"modTime\":\"2017-10-18T08:16:04+0900\",\"modTimeGmt\":\"2017-10-17T23:16:04+0000\",\"regTime\":\"2017-10-18T08:16:04+0900\",\"regTimeGmt\":\"2017-10-17T23:16:04+0000\",\"sympathyCount\":0,\"antipathyCount\":0,\"userBlind\":false,\"hideReplyButton\":false,\"status\":0,\"mine\":false,\"best\":false,\"mentions\":null,\"toUser\":null,\"userStatus\":0,\"categoryImage\":null,\"open\":true,\"levelCode\":null,\"grades\":null,\"sympathy\":false,\"antipathy\":false,\"snsList\":null,\"metaInfo\":null,\"extension\":null,\"audioInfoList\":null,\"translation\":null,\"report\":null,\"middleBlindReport\":false,\"spamInfo\":null,\"userHomepageUrl\":null,\"defamation\":false,\"hiddenByCleanbot\":false,\"visible\":true,\"serviceId\":null,\"manager\":false,\"deleted\":false,\"anonymous\":false,\"blindReport\":false,\"virtual\":false,\"secret\":false,\"blind\":false,\"expose\":true,\"profileUserId\":null,\"containText\":true,\"exposeByCountry\":false,\"maskedUserId\":\"cms2****\",\"maskedUserName\":\"cm****\",\"validateBanWords\":false},{\"ticket\":\"news\",\"objectId\":\"news437,0000165410\",\"categoryId\":\"*\",\"templateId\":\"default_society\",\"commentNo\":1099240845,\"parentCommentNo\":1099240845,\"replyLevel\":1,\"replyCount\":2,\"replyAllCount\":2,\"replyPreviewNo\":null,\"replyList\":null,\"imageCount\":0,\"imageList\":null,\"imagePathList\":null,\"imageWidthList\":null,\"imageHeightList\":null,\"commentType\":\"txt\",\"stickerId\":\"\",\"sticker\":null,\"sortValue\":1508281805188,\"contents\":\"\",\"userIdNo\":\"\",\"exposedUserIp\":null,\"lang\":\"ko\",\"country\":\"KR\",\"idType\":\"naver\",\"idProvider\":\"naver\",\"userName\":\"drip****\",\"userProfileImage\":\"\",\"profileType\":\"naver\",\"modTime\":\"2017-11-16T19:05:52+0900\",\"modTimeGmt\":\"2017-11-16T10:05:52+0000\",\"regTime\":\"2017-10-18T08:10:05+0900\",\"regTimeGmt\":\"2017-10-17T23:10:05+0000\",\"sympathyCount\":0,\"antipathyCount\":0,\"userBlind\":false,\"hideReplyButton\":false,\"status\":1,\"mine\":false,\"best\":false,\"mentions\":null,\"toUser\":null,\"userStatus\":null,\"categoryImage\":null,\"open\":false,\"levelCode\":null,\"grades\":null,\"sympathy\":false,\"antipathy\":false,\"snsList\":null,\"metaInfo\":null,\"extension\":null,\"audioInfoList\":null,\"translation\":null,\"report\":null,\"middleBlindReport\":false,\"spamInfo\":null,\"userHomepageUrl\":null,\"defamation\":false,\"hiddenByCleanbot\":false,\"visible\":false,\"serviceId\":null,\"manager\":false,\"deleted\":true,\"anonymous\":false,\"blindReport\":false,\"virtual\":false,\"secret\":false,\"blind\":false,\"expose\":true,\"profileUserId\":null,\"containText\":true,\"exposeByCountry\":false,\"maskedUserId\":\"drip****\",\"maskedUserName\":\"dr****\",\"validateBanWords\":false},{\"ticket\":\"news\",\"objectId\":\"news437,0000165410\",\"categoryId\":\"*\",\"templateId\":\"view_society\",\"commentNo\":1099239645,\"parentCommentNo\":1099239645,\"replyLevel\":1,\"replyCount\":0,\"replyAllCount\":0,\"replyPreviewNo\":null,\"replyList\":null,\"imageCount\":0,\"imageList\":null,\"imagePathList\":null,\"imageWidthList\":null,\"imageHeightList\":null,\"commentType\":\"txt\",\"stickerId\":null,\"sticker\":null,\"sortValue\":1508281642086,\"contents\":\"헐리웃 영화나 일본 애니메이션처럼 수십년을 사랑 받은 것도 아니고 반짝 드라마 세트장에 안일하게 세금 투입 ㅋㅋㅋ시즌제 드라마라면 이해라도 하지\",\"userIdNo\":\"\",\"exposedUserIp\":null,\"lang\":\"ko\",\"country\":\"KR\",\"idType\":\"naver\",\"idProvider\":\"naver\",\"userName\":\"manm****\",\"userProfileImage\":\"http://profile.phinf.naver.net/34979/e8ac735cffc7baae0681e821d005490432ddf9af89d775abea0bcfcb18cbe5e2.jpg\",\"profileType\":\"naver\",\"modTime\":\"2017-10-18T08:07:22+0900\",\"modTimeGmt\":\"2017-10-17T23:07:22+0000\",\"regTime\":\"2017-10-18T08:07:22+0900\",\"regTimeGmt\":\"2017-10-17T23:07:22+0000\",\"sympathyCount\":1,\"antipathyCount\":0,\"userBlind\":false,\"hideReplyButton\":false,\"status\":0,\"mine\":false,\"best\":false,\"mentions\":null,\"toUser\":null,\"userStatus\":0,\"categoryImage\":null,\"open\":true,\"levelCode\":null,\"grades\":null,\"sympathy\":false,\"antipathy\":false,\"snsList\":null,\"metaInfo\":null,\"extension\":null,\"audioInfoList\":null,\"translation\":null,\"report\":null,\"middleBlindReport\":false,\"spamInfo\":null,\"userHomepageUrl\":null,\"defamation\":false,\"hiddenByCleanbot\":false,\"visible\":true,\"serviceId\":null,\"manager\":false,\"deleted\":false,\"anonymous\":false,\"blindReport\":false,\"virtual\":false,\"secret\":false,\"blind\":false,\"expose\":true,\"profileUserId\":null,\"containText\":true,\"exposeByCountry\":false,\"maskedUserId\":\"manm****\",\"maskedUserName\":\"ma****\",\"validateBanWords\":false},{\"ticket\":\"news\",\"objectId\":\"news437,0000165410\",\"categoryId\":\"*\",\"templateId\":\"view_society\",\"commentNo\":1099238685,\"parentCommentNo\":1099238685,\"replyLevel\":1,\"replyCount\":0,\"replyAllCount\":0,\"replyPreviewNo\":null,\"replyList\":null,\"imageCount\":0,\"imageList\":null,\"imagePathList\":null,\"imageWidthList\":null,\"imageHeightList\":null,\"commentType\":\"txt\",\"stickerId\":null,\"sticker\":null,\"sortValue\":1508281518668,\"contents\":\"청주 제빵왕김탁구세트장이랑 영광의 제인 빵집은 지금 어린이집과 유치원 빵만드는 시설과 빵집 국수집 같이하고 있는데... 이런 기사 보면 여기는 참 잘 활용하는 듯.\",\"userIdNo\":\"\",\"exposedUserIp\":null,\"lang\":\"ko\",\"country\":\"KR\",\"idType\":\"naver\",\"idProvider\":\"naver\",\"userName\":\"nyj7****\",\"userProfileImage\":\"http://profile.phinf.naver.net/34147/fab39edbb527c098c23f9dbbe9fc4b9f8eff7a1b74fcb3077cc3b93de862f382.jpg\",\"profileType\":\"naver\",\"modTime\":\"2017-10-18T08:05:18+0900\",\"modTimeGmt\":\"2017-10-17T23:05:18+0000\",\"regTime\":\"2017-10-18T08:05:18+0900\",\"regTimeGmt\":\"2017-10-17T23:05:18+0000\",\"sympathyCount\":0,\"antipathyCount\":1,\"userBlind\":false,\"hideReplyButton\":false,\"status\":0,\"mine\":false,\"best\":false,\"mentions\":null,\"toUser\":null,\"userStatus\":0,\"categoryImage\":null,\"open\":false,\"levelCode\":null,\"grades\":null,\"sympathy\":false,\"antipathy\":false,\"snsList\":null,\"metaInfo\":null,\"extension\":null,\"audioInfoList\":null,\"translation\":null,\"report\":null,\"middleBlindReport\":false,\"spamInfo\":null,\"userHomepageUrl\":null,\"defamation\":false,\"hiddenByCleanbot\":false,\"visible\":true,\"serviceId\":null,\"manager\":false,\"deleted\":false,\"anonymous\":false,\"blindReport\":false,\"virtual\":false,\"secret\":false,\"blind\":false,\"expose\":true,\"profileUserId\":null,\"containText\":true,\"exposeByCountry\":false,\"maskedUserId\":\"nyj7****\",\"maskedUserName\":\"ny****\",\"validateBanWords\":false}],\"pageModel\":{\"page\":1,\"pageSize\":10,\"indexSize\":10,\"startRow\":1,\"endRow\":10,\"totalRows\":481,\"startIndex\":0,\"totalPages\":49,\"firstPage\":1,\"prevPage\":0,\"nextPage\":2,\"lastPage\":10,\"current\":null,\"threshold\":null,\"moveToLastPage\":false,\"moveToComment\":false,\"moveToLastPrev\":false},\"exposureConfig\":{\"reason\":null,\"status\":\"COMMENT_ON\"},\"count\":{\"comment\":481,\"reply\":86,\"exposeCount\":372,\"delCommentByUser\":119,\"delCommentByMon\":0,\"blindCommentByUser\":0,\"blindReplyByUser\":0,\"total\":567},\"listStatus\":\"all\",\"sort\":\"NEW\",\"bestList\":[]},\"date\":\"2019-04-25T22:26:37+0000\"});"
+```
+
+---
+
+## json 파싱
+
+표준 json의 경우는 httr 패키지의 content() 함수가 자동으로 list 자료형으로 변환해주나 네이버 댓글의 경우 표준과 모양이 달라서 fromJSON() 함수가 에러 발생.
+
+
+```r
+url&lt;-"https://apis.naver.com/commentBox/cbox/web_naver_list_jsonp.json?ticket=news&amp;templateId=view_society&amp;pool=cbox5&amp;_callback=jQuery1707377572341505474_1508264183038&amp;lang=ko&amp;country=&amp;objectId=news437%2C0000165410&amp;categoryId=&amp;pageSize=10&amp;indexSize=10&amp;groupId=&amp;listType=OBJECT&amp;page=1&amp;sort=new&amp;includeAllStatus=true&amp;_=1508264264524"
+ref&lt;-"http://news.naver.com/main/read.nhn?mode=LSD&amp;mid=shm&amp;sid1=102&amp;oid=437&amp;aid=0000165410"
+con &lt;- httr::GET(url,
+                 httr::add_headers(Referer = ref))
+tt &lt;- httr::content(con, "text")
+jsonlite::fromJSON(tt)
+```
+```{}
+Error: lexical error: invalid char in json text.
+                                       jQuery1707377572341505474_15082
+                     (right here) ------^
+```
+
+---
+
+
+```r
+url&lt;-"https://apis.naver.com/commentBox/cbox/web_naver_list_jsonp.json?ticket=news&amp;templateId=view_society&amp;pool=cbox5&amp;_callback=jQuery1707377572341505474_1508264183038&amp;lang=ko&amp;country=&amp;objectId=news437%2C0000165410&amp;categoryId=&amp;pageSize=10&amp;indexSize=10&amp;groupId=&amp;listType=OBJECT&amp;page=1&amp;sort=new&amp;includeAllStatus=true&amp;_=1508264264524"
+ref&lt;-"http://news.naver.com/main/read.nhn?mode=LSD&amp;mid=shm&amp;sid1=102&amp;oid=437&amp;aid=0000165410"
+con &lt;- httr::GET(url,
+                 httr::add_headers(Referer = ref))
+tt &lt;- httr::content(con, "text")
+
+tt &lt;- gsub("(;|\n|_callback|jQuery1707377572341505474_1508264183038)", "", tt)
+tt &lt;- gsub("\\(", "[", tt)
+tt &lt;- gsub("\\)", "]", tt)
+
+data &lt;- jsonlite::fromJSON(tt)
+data$result$commentList[[1]]$contents
+```
+
+```
+##  [1] "드라마세트장같은건 시간이 지나면 서서히 시들게 되있음 그럼 거기다 돈을 투자할려면 장기적으로 보고 후에 다른 컨텐츠를 확보해서 유지할 생각을 해야되는데 아무도 그런생각을 안함. 그런 상황도 모르고 지차체에서 돈퍼줄 생각을 한 사람도 잘라야됨"
+##  [2] ""                                                                                                                                                                                                                                             
+##  [3] "관리와 꾸준한 홍보 했음 이리  허물겠어?  주민들도 그래 지들이 관광객 받을 생각이였음 누워서 떡먹을 생각말고 지들끼리라도 발전시켰어야지"                                                                                                      
+##  [4] ""                                                                                                                                                                                                                                             
+##  [5] "임기내에 뭔가 보이는 업적 쌓아보겠다고 이것저것 많이 쳐 만드는데 막상 시간지나면 쓸데없어진게 대다수고 그런데서 세금 줄줄 다 새지. 시공업체 뇌물 받아먹기도 안성맞춤"                                                                         
+##  [6] "그래서 다스는 누구껀가요?"                                                                                                                                                                                                                    
+##  [7] "영화찍을때 화재 연기좀 안나게 합시다 매연과 미세먼지 보기만 해도 숨막혀여~"                                                                                                                                                                   
+##  [8] ""                                                                                                                                                                                                                                             
+##  [9] "헐리웃 영화나 일본 애니메이션처럼 수십년을 사랑 받은 것도 아니고 반짝 드라마 세트장에 안일하게 세금 투입 ㅋㅋㅋ시즌제 드라마라면 이해라도 하지"                                                                                               
+## [10] "청주 제빵왕김탁구세트장이랑 영광의 제인 빵집은 지금 어린이집과 유치원 빵만드는 시설과 빵집 국수집 같이하고 있는데... 이런 기사 보면 여기는 참 잘 활용하는 듯."
+```
+
+---
+
+class: center, middle, title-slide
+
+# .pen-p[끝!]
+### &lt;https://mrchypark.github.io/getWebR&gt;
+
+#### [[github]](https://github.com/mrchypark/getWebR) [[pdf버전]](https://github.com/mrchypark/getWebR/blob/master/docs/getWebR.pdf) [[문의하기]](http://pf.kakao.com/_RXANd) [[의견 및 오류 신고]](https://github.com/mrchypark/getWebR/issues/new)
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false,
+"ratio": "16:9"
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();</script>
+
+<script>
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

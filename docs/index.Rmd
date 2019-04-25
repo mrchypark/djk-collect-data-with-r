@@ -1,0 +1,680 @@
+---
+title: "R을 이용한 데이터 크롤링"
+author: "박찬엽"
+date: "2019년 4월 26일"
+output:
+  xaringan::moon_reader:
+    seal: false
+    css: ["default", "custom.css"]
+    lib_dir: libs
+    includes:
+      in_header: google_analytics.html
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+      ratio: '16:9'
+---
+
+```{r include=FALSE}
+knitr::opts_chunk$set(cache = T, fig.height = 5)
+tar <- "https://raw.githubusercontent.com/mrchypark/self-introduce/master/docs/index.Rmd"
+
+download.file(tar, destfile = "intro.rmd")
+```
+
+
+class: center, middle, title-slide
+
+## R을 이용한 데이터 크롤링 .small[with 데이터 저널리즘 코리아]
+
+### <https://mrchypark.github.io/djk-collect-data-with-r>
+
+#### [[의견 및 오류 신고]](https://github.com/mrchypark/djk-collect-data-with-r/issues/new)
+#### [스타누르기](https://github.com/mrchypark/djk-collect-data-with-r)는 컨텐츠 제작자를 춤추게 합니다.
+
+### 박찬엽
+
+### 2019년 4월 26일
+
+---
+
+```{r child="intro.rmd"}
+```
+
+---
+
+class: center, middle, title-slide
+
+## .pen-p[R로 웹 데이터를 가져오는 4가지 방법]
+
+---
+class: center, middle, title-slide
+
+## 웹에 있는 데이터를 가져오는 단계
+
+### 요청 - 추출 - 저장 
+### 반복 - 예외처리 - 최적화
+
+---
+
+## 관련 R 패키지 및 함수
+
+#### - 요청 : curl, httr, rvest, RSelenium
+#### - 정리 : 정규표현식, jsonlite, rvest
+#### - 저장 : write.*()
+#### - 반복 : for, parallel
+#### - 예외처리 : try, if
+#### - 최적화 : profvis, microbenchmark
+
+---
+
+## 관련 R 패키지 및 함수
+
+#### **- 요청 : curl, httr, rvest, RSelenium**
+#### **- 정리 : 정규표현식, jsonlite, rvest**
+#### - .gray[저장 : write.*()]
+#### - .gray[반복 : for, parallel]
+#### - .gray[예외처리 : try, if]
+#### - .gray[최적화 : profvis, microbenchmark]
+
+---
+
+class: center, middle, title-slide
+
+## 오늘 이야기 할 것
+
+### 요청(4가지)과 정리
+### .gray[메인과 에피타이저]
+
+---
+
+class: center, middle, title-slide
+
+## 그럼 에피타이저 먼저!
+
+---
+
+## 서버가 하는 것
+.pull-left[
+외부에서 요청하면 규칙대로 정보를 제공하는 것
+]
+.pull-right[
+![](https://pbs.twimg.com/profile_images/581161893219323904/eGnWc30X.png)
+]
+---
+
+## 브라우저가 하는 것
+
+.pull-left[
+서버가 주는 것들을 사용자에게 보여주는 것
+]
+.pull-right[
+![](https://cdn.dribbble.com/users/107490/screenshots/2384364/icon-cloud-06_1x.png)
+]
+---
+
+## 웹 서버가 우리에게 주는 것
+
+text(html, css, js, etc), image. 브라우저가 약속된 모양으로 우리에게 보여줌.
+
+.pull-center[.set[
+![](https://qph.ec.quoracdn.net/main-qimg-1f99b9ce08edd2309efff97b710ffcbe)
+]]
+
+---
+
+## 실제로 브라우저가 받는 파일들
+
+.pull-center[.half[
+![](https://raw.githubusercontent.com/mrchypark/getWebR/master/img/source.png)
+]]
+
+---
+
+class: center, middle, title-slide
+
+## * 그럼 web api는 뭔가?
+
+web으로 제공되는 Application Programming Interface
+
+함수인데 외부 서버에서 동작하여 웹 기술로 결과를 받는 것
+
+---
+
+## 우리가 필요한 것
+
+text(html) 중 일부만(ex>제목)
+
+![](https://raw.githubusercontent.com/mrchypark/getWebR/master/img/title.png)
+
+---
+
+class: center, middle, title-slide
+
+
+### 그럼 이제 정리(에피타이저)를 설명
+
+#### .blue[html 문서안에 글자 중 필요한 것만 가져오기]
+
+---
+
+class: center, middle, title-slide
+
+#### 1번 글자를 다루는 강력한 방법 : 정규표현식 하지만 어려움    
+
+### 2번 xml의 node를 다루는 패키지 : rvest
+
+---
+
+class: center, middle, title-slide
+
+정규표현식은 [검색](https://www.google.co.kr/search?q=%EC%A0%95%EA%B7%9C%ED%91%9C%ED%98%84%EC%8B%9D&oq=%EC%A0%95%EA%B7%9C%ED%91%9C%ED%98%84%EC%8B%9D&aqs=chrome..69i57j69i61.2391j0j7&sourceid=chrome&ie=UTF-8)해보세요.
+r에서는 [stringr](https://github.com/tidyverse/stringr) 이라는 서포트 패키지가 있음.
+
+---
+
+class: center, middle, title-slide
+
+## [rvest](https://github.com/hadley/rvest)
+
+### node, attr, text만 기억하면 됨.
+
+---
+
+## node란
+
+html에서 tag라고 불리는 것.
+.pull-center[.ori[
+![](https://lh3.googleusercontent.com/SSAbYW6kAM728XuKv3PK5Uhgva0ueIBDnoGhPkou6lp9QYgDVwRFivfQNgORT8FT5js4gBFezjSvZlqujcbWup6yXvRTkEOkMotawSPcaOpc9dQvyVP05ODEFw)
+]]
+---
+
+## 그럼 html 이란
+
+[xml](https://ko.wikipedia.org/wiki/XML)양식으로 작성된 웹 브라우저들이 이해하는 표준 문서
+
+.pull-center[.ori[
+![](https://lh3.googleusercontent.com/az75sycVUFHD0aIKUmCZrs_Nf3-LCxiHSsYUZ_z5umiHK3XX77f1A6vCCD7YZYQNOAploEFjMYcu9x-DxRe5JdqZGFsnA3FhCvO3pRNBsK5M50RgzKd0hrx2gg)
+]]
+
+---
+
+## attr 이란
+
+attr은 attribute의 줄임으로 아래 예시로 tag의 attr1은 example1 임
+
+```{}
+<tag attr1="example1" attr2="example2"> 안녕하세요 </tag>
+```
+
+---
+
+#### 원하는 글자가 있는 노드를 지정하기 위해서
+
+[css 선택자](http://www.nextree.co.kr/p8468/)를 공부해야 함.
+
+--
+
+#### css 선택자가 동작하는 방식
+
+1. tag 이름
+2. tag의 id 속성
+3. tag의 class 속성
+4. tag의 custom 속성
+
+--
+
+#### css 선택자로 node를 선택하기 위해서
+
+1. `tag`
+1. `#id`
+1. `.class`
+1. `[attr="val"]`
+1. `tag#id`
+1. `tag.class`
+1. `tag[attr="val"]`
+
+---
+
+## text 이란
+
+text은 시작 태그와 종료 태그 사이에 있는 글자로, 아래 예시 기준 "안녕하세요" 를 뜻함
+
+```{}
+<tag attr1="example1" attr2="example2"> 안녕하세요 </tag>
+```
+
+---
+
+## rvest의 동작 순서(text 가져오기)
+
+1. html 문서 데이터 가져오기
+1. 필요한 노드 선택하기
+1. 노드내에 text를 가져오기
+
+
+### rvest 함수
+
+```{}
+read_html(url)
+read_html(url) %>% html_nodes("tag.class")
+read_html(url) %>% html_nodes("tag.class") %>% html_text
+```
+
+---
+
+## rvest의 동작 순서(attr 가져오기)
+
+1. html 문서 데이터 가져오기
+1. 필요한 노드 선택하기
+1. 노드내에 attr 중에 "attr1"값을 가져오기
+
+
+### rvest 함수
+
+```{}
+read_html(url)
+read_html(url) %>% html_nodes("tag.class")
+read_html(url) %>% html_nodes("tag.class") %>% html_attr("attr1")
+```
+
+---
+
+## 예시
+
+```{r}
+library(rvest)
+url<-"https://news.naver.com/main/hotissue/read.nhn?mid=hot&sid1=100&cid=1079165&iid=2975770&oid=001&aid=0010571037&ptype=052"
+(nv<-read_html(url))
+(nvns<-html_nodes(nv, "h3#articleTitle"))
+```
+.pull-left[
+```{r}
+(title<-html_text(nvns))
+```
+]
+.pull-right[
+```{r}
+(class<-html_attr(nvns, "class"))
+```
+]
+---
+
+class: center, middle, title-slide
+
+rvest는 html 문서로 되어 있는 웹에서의 텍스트 데이터를 가져와서 처리하는 패키지
+
+---
+
+class: center, middle, title-slide
+
+## 이제 메인! 요청하기
+### (read_html이 방법 1 ㄷㄷㄷ)
+
+---
+
+class: center, middle, title-slide
+
+### 그래서 우리가 알아야 할 것
+
+## GET과 POST
+
+---
+
+class: center, middle, title-slide
+
+방금 read_html 함수는 GET 방식으로 서버에 요청하여 html 문서를 받은 것.
+
+---
+
+class: center, middle, title-slide
+
+http 표준 요청을 수행해 주는 [httr](https://github.com/r-lib/httr) 패키지
+
+---
+
+## GET 요청
+
+read_html(url) == content(GET(url)) 인걸로 GET 요청으로 html 문서를 가져올 때는 read_html()함수가 함께 처리해줌.
+
+```{r}
+library(httr)
+library(rvest)
+
+url<-"http://news.naver.com/main/read.nhn?mode=LSD&mid=shm&sid1=102&oid=437&aid=0000165410"
+dat<-GET(url)
+content(dat)
+
+read_html(url)
+```
+
+---
+
+class: center, middle, title-slide
+
+## 왜 GET 함수를 써야 하는가
+
+header, cookie 등 다양한 옵션을 사용할 수 있음.    
+
+ex> 크롤러가 아니라고 속여야 한다던가....
+
+---
+
+class: center, middle, title-slide
+
+### 그럼 POST 란?
+
+---
+
+## POST 란
+
+body에 사용자가 필요한 값을 추가해서 요청을 할 수 있는 방법
+
+---
+
+## 사용할 api
+
+[한글 띄어쓰기 api](http://freesearch.pe.kr/archives/4647)
+
+띄어쓰기가 불문명한 텍스트를 전달하면 맞는 띄어쓰기 결과를 돌려줌.
+
+---
+
+## 실행
+
+```r
+library(httr)
+
+body<-list(sent="아래와같은방식으로API를사용할수있으며,호출건수에대해서별도의제한은없으나,1회 호출에200글자로글자수를제한하고있다.")
+res<-PUT(url='http://35.201.156.140:8080/spacing', body=body)
+
+content(res)$sent
+```
+```
+## [1] "아래와 같은 방식으로 API를 사용할 수 있으며, 호출 건수에 대해서 별도의 제한은 없으나, 1회 호출에 200글자로 글자수를 제한하고 있다. "
+```
+---
+
+## body 란
+
+list() 자료형으로 되어 있고 이름이 있는 데이터로 만든 요청에 추가할 수 있는 값
+
+```r
+body <- list(sent = "아래와같은방식으로API를사용할수있으며,호출건수에대해서별도의제한은없으나,1회 호출에200글자로글자수를제한하고있다.")
+body
+```
+```
+## $sent
+## [1] "아래와같은방식으로API를사용할수있으며,호출건수에대해서별도의제한은없으나,1회 호출에200글자로글자수를제한하고있다."
+```
+
+---
+
+## 여긴 PUT 이라고 되어 있는데?
+
+PUT은 POST와 매우 유사한 요청 방식으로 서버에서 요구하는 방식을 지켜줘야함. 예시로 PUT을 사용했지만, 다른 POST가 필요한 곳에서는 POST 명령으로 작성하면 됨. 서비스 제공자가 설명서를 작성하게 되어있음.
+
+```r
+(res <- PUT(url = 'http://35.201.156.140:8080/spacing', body=body))
+```
+
+```
+## Response [http://35.201.156.140:8080/spacing]
+##   Date: 2017-10-18 06:48
+##   Status: 200
+##   Content-Type: application/json
+##   Size: 348 B
+## {"sent": "\uc544\ub798\uc640 \uac19\uc740 \ubc29\uc2dd\uc73c\ub85c API\u...
+```
+
+---
+
+## api 명세 예시
+
+![](https://raw.githubusercontent.com/mrchypark/getWebR/master/img/api.png)
+
+---
+
+## content() 함수
+
+httr 패키지의 요청들은 read_html() 함수와 달리 header 나 cookie 등의 모든 정보를 다 확인할 수 있음. 그래서 응답으로 서버가 데이터로써 준 내용을 확인하기 위해서 content() 함수를 제공함.
+
+```r
+content(res)
+```
+```
+## $sent
+## [1] "아래와 같은 방식으로 API를 사용할 수 있으며, 호출 건수에 대해서 별도의 제한은 없으나, 1회 호출에 200글자로 글자수를 제한하고 있다. "
+```
+
+
+---
+
+class: center, middle, title-slide
+
+여기까지가 http 요청을 따라하는 httr 패키지(방법 2)
+
+---
+class: center, middle, title-slide
+
+## 중간 정산
+
+이제 정적 웹 서비스내의 글자와 web api 데이터를 가져오는 2가지 방법을 알게 됨.
+
+---
+class: center, middle, title-slide
+
+## 이제 필요한 것
+
+### 동적 웹 서비스에서 가져오기
+
+---
+
+## 동적 웹 서비스란
+
+javascript<sup>1</sup>가 웹페이지 동작을 조절하는 것.
+
+.pull-center[.set[
+![](https://qph.ec.quoracdn.net/main-qimg-1f99b9ce08edd2309efff97b710ffcbe)
+]]
+
+.footnote[
+[1] [javascript](https://ko.wikipedia.org/wiki/%EC%9E%90%EB%B0%94%EC%8A%A4%ED%81%AC%EB%A6%BD%ED%8A%B8) : 브라우저에서 동작하는 개발 언어로 동적 웹 서비스를 개발하는 목적으로 많이 사용함.
+]
+
+---
+
+## 그래서 브라우저가 필요함
+
+동적 웹 서비스내의 데이터는 브라우저가 처리해준 결과이기 때문에 브라우저와 같이 처리하는 방법을 찾던지, 브라우저를 사용하던지 해야 함.
+
+---
+class: center, middle, title-slide
+
+
+## [RSelenium](https://github.com/ropensci/RSelenium)
+
+---
+
+## Selenium 이란
+
+Selenium은 코드로 브라우저를 컨트롤하는 패키지. 그래서 브라우저를 움직일 수 있다! 그걸 R에서 사용하는 [RSelenium 패키지](https://github.com/ropensci/RSelenium)를 사용할 예정
+
+.pull-center[.ori[
+![](https://2.bp.blogspot.com/-idwhrEvGRcM/WAhO0w9TwnI/AAAAAAAAAGU/xThZWzPBrfIiz_RbcIk4CTwrpZiVJayFgCLcB/s320/Selenium.jpg)
+]]
+
+---
+
+class: center, middle, title-slide
+
+## 어떤 브라우저를 사용할까?
+
+## [phantomjs](http://phantomjs.org/)
+
+---
+
+## phantonjs 란
+
+phantomjs는 headless 브라우저로 headless란 사람이 보는 부분이 없는 것
+
+.pull-center[.ori[
+![](http://phantomjs.org/img/phantomjs-logo.png)
+]]
+
+.footnote[
+ * 최근 chrome도 headless를 자체적으로 지원하기 시작함.
+]
+
+---
+
+## 실행
+
+```r
+library(RSelenium)
+pJS <- wdman::phantomjs(port = 4567L)
+```
+```
+## checking phantomjs versions:
+## BEGIN: PREDOWNLOAD
+## BEGIN: DOWNLOAD
+## BEGIN: POSTDOWNLOAD
+```
+```r
+remDr <- remoteDriver(port = 4567L, browserName = 'phantomjs')
+remDr$open()
+```
+```
+## [1] "Connecting to remote server"
+## $browserName
+## [1] "phantomjs"
+## 
+## $version
+## [1] "2.1.1"
+## 
+## $driverName
+## [1] "ghostdriv
+```
+
+---
+
+## 실행
+
+```r
+remDr$navigate("http://www.google.com/ncr")
+remDr$getTitle()[[1]]
+```
+```
+## [1] "Google"
+```
+```r
+remDr$close()
+pJS$stop()
+```
+```
+## [1] TRUE
+```
+
+---
+
+## 시연
+
+키 입력과 마우스 클릭을 확인
+
+[시연코드 가기](https://raw.githubusercontent.com/mrchypark/getWebR/master/RSelenium.R)
+
+---
+
+class: center, middle, title-slide
+
+RSelenium이란 브라우저를 컨트롤하는 패키지(방법 3)
+
+---
+
+class: center, middle, title-slide
+
+마지막으로...
+
+---
+
+## +고급
+
+크롬 개발자 도구를 이용하면 js가 가져오는 api를 찾아서 더 빠르게 정보를 가져올 수 있음
+
+![](https://raw.githubusercontent.com/mrchypark/getWebR/master/img/comment.png)
+
+---
+
+## GET 요청
+
+찾아낸 주소에 GET() 요청을 시도함(은 실패). 이런 웹 서비스 내에서 사용하는 api의 경우 OpenAPI 가 아니기 때문에 설명서 없고, 다양한 시도를 통해서 사용법을 찾아야 함.
+
+```{r}
+url<-"https://apis.naver.com/commentBox/cbox/web_naver_list_jsonp.json?ticket=news&templateId=view_society&pool=cbox5&_callback=jQuery1707377572341505474_1508264183038&lang=ko&country=&objectId=news437%2C0000165410&categoryId=&pageSize=10&indexSize=10&groupId=&listType=OBJECT&page=1&sort=new&includeAllStatus=true&_=1508264264524"
+
+con <- httr::GET(url)
+tt <- httr::content(con, "text")
+tt
+```
+
+---
+
+## 추가 정보 제공
+
+네이버 뉴스 댓글의 경우, referer라는 정보가 요청 header에 있어야만 정상 동작함
+
+```{r}
+url<-"https://apis.naver.com/commentBox/cbox/web_naver_list_jsonp.json?ticket=news&templateId=view_society&pool=cbox5&_callback=jQuery1707377572341505474_1508264183038&lang=ko&country=&objectId=news437%2C0000165410&categoryId=&pageSize=10&indexSize=10&groupId=&listType=OBJECT&page=1&sort=new&includeAllStatus=true&_=1508264264524"
+ref<-"http://news.naver.com/main/read.nhn?mode=LSD&mid=shm&sid1=102&oid=437&aid=0000165410"
+con <- httr::GET(url,
+                 httr::add_headers(Referer = ref))
+tt <- httr::content(con, "text")
+tt
+```
+
+---
+
+## json 파싱
+
+표준 json의 경우는 httr 패키지의 content() 함수가 자동으로 list 자료형으로 변환해주나 네이버 댓글의 경우 표준과 모양이 달라서 fromJSON() 함수가 에러 발생.
+
+```{r eval=FALSE}
+url<-"https://apis.naver.com/commentBox/cbox/web_naver_list_jsonp.json?ticket=news&templateId=view_society&pool=cbox5&_callback=jQuery1707377572341505474_1508264183038&lang=ko&country=&objectId=news437%2C0000165410&categoryId=&pageSize=10&indexSize=10&groupId=&listType=OBJECT&page=1&sort=new&includeAllStatus=true&_=1508264264524"
+ref<-"http://news.naver.com/main/read.nhn?mode=LSD&mid=shm&sid1=102&oid=437&aid=0000165410"
+con <- httr::GET(url,
+                 httr::add_headers(Referer = ref))
+tt <- httr::content(con, "text")
+jsonlite::fromJSON(tt)
+```
+```{}
+Error: lexical error: invalid char in json text.
+                                       jQuery1707377572341505474_15082
+                     (right here) ------^
+```
+
+---
+
+```{r}
+url<-"https://apis.naver.com/commentBox/cbox/web_naver_list_jsonp.json?ticket=news&templateId=view_society&pool=cbox5&_callback=jQuery1707377572341505474_1508264183038&lang=ko&country=&objectId=news437%2C0000165410&categoryId=&pageSize=10&indexSize=10&groupId=&listType=OBJECT&page=1&sort=new&includeAllStatus=true&_=1508264264524"
+ref<-"http://news.naver.com/main/read.nhn?mode=LSD&mid=shm&sid1=102&oid=437&aid=0000165410"
+con <- httr::GET(url,
+                 httr::add_headers(Referer = ref))
+tt <- httr::content(con, "text")
+
+tt <- gsub("(;|\n|_callback|jQuery1707377572341505474_1508264183038)", "", tt)
+tt <- gsub("\\(", "[", tt)
+tt <- gsub("\\)", "]", tt)
+
+data <- jsonlite::fromJSON(tt)
+data$result$commentList[[1]]$contents
+```
+
+---
+
+class: center, middle, title-slide
+
+# .pen-p[끝!]
+### <https://mrchypark.github.io/getWebR>
+
+#### [[github]](https://github.com/mrchypark/getWebR) [[pdf버전]](https://github.com/mrchypark/getWebR/blob/master/docs/getWebR.pdf) [[문의하기]](http://pf.kakao.com/_RXANd) [[의견 및 오류 신고]](https://github.com/mrchypark/getWebR/issues/new)
