@@ -2,3 +2,4 @@ base
 xml2
 rvest
 httr
+magrittr

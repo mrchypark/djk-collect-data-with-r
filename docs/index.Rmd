@@ -5,7 +5,7 @@ date: "2019년 4월 26일"
 output:
   xaringan::moon_reader:
     seal: false
-    css: ["default", "custom.css"]
+    css: ["default", "ninjutsu", "custom.css"]
     lib_dir: libs
     includes:
       in_header: google_analytics.html
@@ -17,7 +17,7 @@ output:
 ---
 
 ```{r include=FALSE}
-knitr::opts_chunk$set(cache = T, fig.height = 5)
+knitr::opts_chunk$set(cache = F, fig.height = 5)
 tar <- "https://raw.githubusercontent.com/mrchypark/self-introduce/master/docs/index.Rmd"
 
 download.file(tar, destfile = "intro.rmd")
@@ -38,10 +38,30 @@ class: center, middle, title-slide
 ### 2019년 4월 26일
 
 ---
+class: split-50 
 
-```{r child="intro.rmd"}
-```
+.column[.content.vmiddle.right[
+    ![](https://avatars2.githubusercontent.com/u/6179259?v=4&s=460)
+]]
+.column[.content.left[
+<br>
+### 박찬엽     
+- .yellow[(현)] SK Telecome AI센터 AI Product Science팀 
+- .yellow[(현)] 팟캐스트 데이터홀릭 .blue[박박사]
+- .gray[(전)]코빗 재무팀 데이터 담당자
+  * 재무DB 구축/관리 및 자동화
+- .gray[(전)]서울도시가스 선행연구팀 연구원
+  * 챗봇 엔진 개발 및 서버 구축
+- .gray[(전)]2017년 패스트 캠퍼스 데이터 분석 R 강의
+  * [데이터 분석을 위한 중급 R 프로그래밍](http://www.fastcampus.co.kr/data_camp_dabrp/)
+- [ForkonLP](https://forkonlp.github.io/) 프로젝트 오너
+  * N사 뉴스 크롤러 [N2H4](https://github.com/forkonlp/N2H4), D사 뉴스 크롤러 [DNH4](https://github.com/forkonlp/DNH4)
 
+  
+
+- .blue[**FACEBOOK**]@[mrchypark](https://www.facebook.com/mrchypark)
+- .gray[**GITHUB**]@[mrchypark](https://github.com/mrchypark)
+]]
 ---
 
 class: center, middle, title-slide
@@ -283,21 +303,47 @@ read_html(url) %>% html_nodes("tag.class") %>% html_attr("attr1")
 
 ## 예시
 
-```{r}
+```{r eval=F}
 library(rvest)
-url<-"https://news.naver.com/main/hotissue/read.nhn?mid=hot&sid1=100&cid=1079165&iid=2975770&oid=001&aid=0010571037&ptype=052"
-(nv<-read_html(url))
-(nvns<-html_nodes(nv, "h3#articleTitle"))
+url <- "https://news.naver.com/main/hotissue/read.nhn?mid=hot&sid1=100&cid=1079165&iid=2975770&oid=001&aid=0010571037&ptype=052"
+nv <- read_html(url)
 ```
+
+```{r echo=FALSE}
+library(rvest)
+url <- "https://news.naver.com/main/hotissue/read.nhn?mid=hot&sid1=100&cid=1079165&iid=2975770&oid=001&aid=0010571037&ptype=052"
+nv <- read_html(url)
+nv
+```
+
+```{r eval=F}
+nvns <- html_nodes(nv, "h3#articleTitle")
+```
+
+```{r echo=FALSE}
+nvns <- html_nodes(nv, "h3#articleTitle")
+nvns
+```
+
 .pull-left[
-```{r}
-(title<-html_text(nvns))
+```{r eval=F}
+title <- html_text(nvns)
+```
+
+```{r echo=F, out.width=16}
+title <- html_text(nvns)
+title
 ```
 ]
 .pull-right[
-```{r}
-(class<-html_attr(nvns, "class"))
+```{r eval=F}
+id <- html_attr(nvns, "id")
 ```
+```{r echo=F}
+id <- html_attr(nvns, "id")
+id
+```
+
 ]
 ---
 
@@ -342,8 +388,8 @@ read_html(url) == content(GET(url)) 인걸로 GET 요청으로 html 문서를 �
 library(httr)
 library(rvest)
 
-url<-"http://news.naver.com/main/read.nhn?mode=LSD&mid=shm&sid1=102&oid=437&aid=0000165410"
-dat<-GET(url)
+url <- "http://news.naver.com/main/read.nhn?mode=LSD&mid=shm&sid1=102&oid=437&aid=0000165410"
+dat <- GET(url)
 content(dat)
 
 read_html(url)
@@ -371,68 +417,123 @@ class: center, middle, title-slide
 
 body에 사용자가 필요한 값을 추가해서 요청을 할 수 있는 방법
 
+.pull-left[
+```{r eval = F}
+res <- GET(url = '필요한 인터넷 주소')
+```
+]
+.pull-right[
+```{r eval = F}
+bodys <- list(여기에 데이터가 들어갑니다.)
+
+res <- POST(url = '필요한 인터넷 주소',
+            body = bodys)
+```
+]
+
 ---
 
 ## 사용할 api
 
-[한글 띄어쓰기 api](http://freesearch.pe.kr/archives/4647)
+네이버 파파고 번역 api
 
-띄어쓰기가 불문명한 텍스트를 전달하면 맞는 띄어쓰기 결과를 돌려줌.
+<https://developers.naver.com/products/nmt/>
+
+인공 신경망으로 한영 번역을 진행해 줌
 
 ---
 
-## 실행
+## 네이버 개발자센터에서 본인 등록 
 
-```r
-library(httr)
+[네이버 개발자센터](https://developers.naver.com/main/) 
 
-body<-list(sent="아래와같은방식으로API를사용할수있으며,호출건수에대해서별도의제한은없으나,1회 호출에200글자로글자수를제한하고있다.")
-res<-PUT(url='http://35.201.156.140:8080/spacing', body=body)
+![](https://raw.githubusercontent.com/MrKevinNa/MrKevinNa.github.io/master/images/2019-04-17-Naver-Papago-API를-활용한-NMT-번역/Naver_API_01.png)
 
-content(res)$sent
-```
-```
-## [1] "아래와 같은 방식으로 API를 사용할 수 있으며, 호출 건수에 대해서 별도의 제한은 없으나, 1회 호출에 200글자로 글자수를 제한하고 있다. "
-```
 ---
+
+## 단계
+
+**Application** > **계정 설정**을 클릭하여 본인인증
+
+![](https://raw.githubusercontent.com/MrKevinNa/MrKevinNa.github.io/master/images/2019-04-17-Naver-Papago-API를-활용한-NMT-번역/Naver_API_02.png)
+
+---
+
+## 어플리케이션 등록 
+
+**사용 API**는 **Papago NMT 번역**을 선택
+
+![](https://user-images.githubusercontent.com/6179259/56791074-29811880-6841-11e9-9e0d-b3a89df9be0e.png)
+
+---
+
+## 서비스 환경
+
+**WEB 설정** 선택, **http://naver.com** 입력
+
+![](https://user-images.githubusercontent.com/6179259/56791143-4fa6b880-6841-11e9-8968-68e398cc2fb6.png)
+---
+## api key 발급
+
+**Client ID**와 **Client Secret** 을 잘 보관
+
+![](https://user-images.githubusercontent.com/6179259/56791378-e6737500-6841-11e9-977b-7091073cbe5d.png)
+
+---
+
+## api key 등록
+
+```{r eval = F}
+install.packages("usethis")
+library(usethis)
+edit_r_environ()
+```
+
+![](https://user-images.githubusercontent.com/6179259/56792778-546d6b80-6845-11e9-875d-f2065fd816b9.png)
+
+---
+
+## 등록 상태 확인
+
+`.Renviron` 파일을 저장한 후 Rstudio 를 재시작
+
+```{r eval=FALSE}
+Sys.getenv('NAVER_CLIENT_ID')
+Sys.getenv('NAVER_CLIENT_SECRET')
+```
+
+---
+
+## 개발가이드 확인
+
+<https://developers.naver.com/docs/papago/>
 
 ## body 란
 
 list() 자료형으로 되어 있고 이름이 있는 데이터로 만든 요청에 추가할 수 있는 값
 
-```r
-body <- list(sent = "아래와같은방식으로API를사용할수있으며,호출건수에대해서별도의제한은없으나,1회 호출에200글자로글자수를제한하고있다.")
-body
-```
-```
-## $sent
-## [1] "아래와같은방식으로API를사용할수있으며,호출건수에대해서별도의제한은없으나,1회 호출에200글자로글자수를제한하고있다."
+```{r}
+string <- '오늘 주제는 언론인을 위한 R 을 이용한 데이터 크롤링입니다.'
+bodys <- list(source = 'ko', target = 'en', text = string)
 ```
 
 ---
 
-## 여긴 PUT 이라고 되어 있는데?
+## PUST 요청
 
-PUT은 POST와 매우 유사한 요청 방식으로 서버에서 요구하는 방식을 지켜줘야함. 예시로 PUT을 사용했지만, 다른 POST가 필요한 곳에서는 POST 명령으로 작성하면 됨. 서비스 제공자가 설명서를 작성하게 되어있음.
+네이버의 인증을 통한 서비스를 진행하므로 header 정보를 추가함
 
-```r
-(res <- PUT(url = 'http://35.201.156.140:8080/spacing', body=body))
+```{r}
+library(httr)
+
+ah <- add_headers('X-Naver-Client-Id' = Sys.getenv('NAVER_CLIENT_ID'),
+                  'X-Naver-Client-Secret' = Sys.getenv('NAVER_CLIENT_SECRET'))
+
+res <- POST(url = 'https://openapi.naver.com/v1/papago/n2mt',
+            encode = 'json',
+            body = bodys,
+            config = ah)
 ```
-
-```
-## Response [http://35.201.156.140:8080/spacing]
-##   Date: 2017-10-18 06:48
-##   Status: 200
-##   Content-Type: application/json
-##   Size: 348 B
-## {"sent": "\uc544\ub798\uc640 \uac19\uc740 \ubc29\uc2dd\uc73c\ub85c API\u...
-```
-
----
-
-## api 명세 예시
-
-![](https://raw.githubusercontent.com/mrchypark/getWebR/master/img/api.png)
 
 ---
 
@@ -440,14 +541,19 @@ PUT은 POST와 매우 유사한 요청 방식으로 서버에서 요구하는 �
 
 httr 패키지의 요청들은 read_html() 함수와 달리 header 나 cookie 등의 모든 정보를 다 확인할 수 있음. 그래서 응답으로 서버가 데이터로써 준 내용을 확인하기 위해서 content() 함수를 제공함.
 
-```r
+```{r}
 content(res)
 ```
-```
-## $sent
-## [1] "아래와 같은 방식으로 API를 사용할 수 있으며, 호출 건수에 대해서 별도의 제한은 없으나, 1회 호출에 200글자로 글자수를 제한하고 있다. "
-```
 
+---
+
+## PUST 요청 결과 확인
+
+`list()` 자료형 내부에 필요한 데이터만 가져 옴
+
+```{r}
+content(res)$message$result$translatedText
+```
 
 ---
 
@@ -675,6 +781,6 @@ data$result$commentList[[1]]$contents
 class: center, middle, title-slide
 
 # .pen-p[끝!]
-### <https://mrchypark.github.io/getWebR>
+### <https://mrchypark.github.io/djk-collect-data-with-r>
 
-#### [[github]](https://github.com/mrchypark/getWebR) [[pdf버전]](https://github.com/mrchypark/getWebR/blob/master/docs/getWebR.pdf) [[문의하기]](http://pf.kakao.com/_RXANd) [[의견 및 오류 신고]](https://github.com/mrchypark/getWebR/issues/new)
+#### [[github]](https://github.com/mrchypark/djk-collect-data-with-r) [[의견 및 오류 신고]](https://github.com/mrchypark/djk-collect-data-with-r/issues/new)
