@@ -46,7 +46,7 @@ class: split-50
 .column[.content.left[
 <br>
 ### 박찬엽     
-- .yellow[(현)] SK Telecome AI센터 AI Product Science팀 
+- .yellow[(현)] SK Telecome AI센터 개발자 
 - .yellow[(현)] 팟캐스트 데이터홀릭 .blue[박박사]
 - .gray[(전)]코빗 재무팀 데이터 담당자
   * 재무DB 구축/관리 및 자동화
@@ -519,7 +519,7 @@ bodys <- list(source = 'ko', target = 'en', text = string)
 
 ---
 
-## PUST 요청
+## POST 요청
 
 네이버의 인증을 통한 서비스를 진행하므로 header 정보를 추가함
 
@@ -547,7 +547,7 @@ content(res)
 
 ---
 
-## PUST 요청 결과 확인
+## POST 요청 결과 확인
 
 `list()` 자료형 내부에 필요한 데이터만 가져 옴
 
